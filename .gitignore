@@ -1,0 +1,38 @@
+# ─── Secrets & Credentials ───────────────────────────────────────────────────
+.env
+credentials/service_account.json
+credentials/*.json
+
+# ─── Python ──────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.Python
+
+# ─── Virtual Environments ────────────────────────────────────────────────────
+venv/
+.venv/
+env/
+ENV/
+
+# ─── FAISS Index & Metadata (generated at runtime) ───────────────────────────
+faiss_index.bin
+metadata.json
+
+# ─── Downloaded temp files ───────────────────────────────────────────────────
+tmp/
+*.tmp
+
+# ─── IDE / OS ────────────────────────────────────────────────────────────────
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+Thumbs.db
