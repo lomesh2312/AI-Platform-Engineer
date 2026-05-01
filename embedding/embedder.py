@@ -1,108 +1,67 @@
 """
 embedding/embedder.py
 ─────────────────────
-SentenceTransformer embedding logic.
+FastEmbed embedding logic (Lightweight, No PyTorch).
 
 Responsibilities:
-  • Load the all-MiniLM-L6-v2 model once and cache it in memory.
-  • Embed a list of text chunks in a single batch (efficient).
+  • Load the BAAI/bge-small-en-v1.5 model once and cache it.
+  • Embed a list of text chunks (efficient list generator).
   • Embed a single query string at inference time.
-  • Return numpy float32 arrays that FAISS can consume directly.
+  • Return numpy float32 arrays (384-dim) for FAISS.
 """
 
 import logging
 from functools import lru_cache
-
 import numpy as np
-from sentence_transformers import SentenceTransformer
+from fastembed import TextEmbedding
 
 import config
 
 logger = logging.getLogger(__name__)
 
-
 @lru_cache(maxsize=1)
-def _load_model() -> SentenceTransformer:
+def _get_model() -> TextEmbedding:
     """
-    Load the SentenceTransformer model and cache it for the process lifetime.
-
-    lru_cache(maxsize=1) ensures the model is loaded only once no matter
-    how many times _load_model() is called — avoids repeated disk I/O.
-
-    Returns:
-        Loaded SentenceTransformer model.
+    Load the FastEmbed model and cache it.
+    Note: The first call will download the model files (~130MB).
     """
-    logger.info("Loading embedding model: %s ...", config.EMBEDDING_MODEL)
-    model = SentenceTransformer(config.EMBEDDING_MODEL)
-    logger.info("✅ Embedding model loaded.")
+    logger.info("Loading FastEmbed model: BAAI/bge-small-en-v1.5 ...")
+    # fastembed downloads models automatically to ~/.cache/fastembed/
+    model = TextEmbedding(model_name="BAAI/bge-small-en-v1.5")
+    logger.info("✅ FastEmbed model loaded.")
     return model
-
 
 def embed_chunks(chunks: list[dict]) -> np.ndarray:
     """
     Convert a list of chunk dicts into a 2-D numpy embedding matrix.
-
-    All chunks are embedded in a single batch call for efficiency.
-    The resulting matrix has shape (num_chunks, EMBEDDING_DIMENSION).
-
-    Args:
-        chunks: List of chunk dicts — each must have a "text" key.
-
-    Returns:
-        Float32 numpy array of shape (N, 384).
-
-    Raises:
-        ValueError: If the chunks list is empty.
     """
     if not chunks:
         raise ValueError("embed_chunks() received an empty list.")
 
-    model = _load_model()
+    model = _get_model()
     texts = [chunk["text"] for chunk in chunks]
 
-    logger.info("Embedding %d chunk(s) in batch ...", len(texts))
+    logger.info("Embedding %d chunk(s) via FastEmbed...", len(texts))
+    
+    # .embed returns a generator, we convert to list then numpy
+    embeddings_gen = model.embed(texts)
+    embeddings_list = list(embeddings_gen)
+    embeddings = np.array(embeddings_list).astype(np.float32)
 
-    embeddings = model.encode(
-        texts,
-        batch_size=64,           # process up to 64 texts at once
-        show_progress_bar=True,  # shows tqdm bar in terminal during sync
-        convert_to_numpy=True,
-        normalize_embeddings=True,  # L2-norm → cosine similarity via dot product
-    )
-
-    # Ensure float32 — FAISS requires it
-    embeddings = embeddings.astype(np.float32)
-
-    logger.info(
-        "✅ Batch embedding done. Shape: %s, dtype: %s",
-        embeddings.shape,
-        embeddings.dtype,
-    )
+    logger.info("✅ Embedding done. Shape: %s", embeddings.shape)
     return embeddings
-
 
 def embed_query(query: str) -> np.ndarray:
     """
-    Embed a single user query string into a 1-D vector ready for FAISS search.
-
-    Args:
-        query: The user's natural-language question.
-
-    Returns:
-        Float32 numpy array of shape (384,).
-
-    Raises:
-        ValueError: If the query string is empty.
+    Embed a single user query string.
     """
     if not query.strip():
         raise ValueError("embed_query() received an empty query string.")
 
-    model = _load_model()
-
-    embedding = model.encode(
-        [query],                     # encode always wants a list
-        convert_to_numpy=True,
-        normalize_embeddings=True,   # must match how chunks were embedded
-    )
-
-    return embedding[0].astype(np.float32)  # shape: (384,)
+    model = _get_model()
+    
+    # FastEmbed's .embed always expects a list
+    embeddings_gen = model.embed([query])
+    embedding = list(embeddings_gen)[0]
+    
+    return np.array(embedding).astype(np.float32)

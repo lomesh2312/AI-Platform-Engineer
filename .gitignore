@@ -36,3 +36,4 @@ tmp/
 *.swp
 *.swo
 Thumbs.db
+deploy_render.py

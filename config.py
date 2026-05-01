@@ -22,6 +22,19 @@ GOOGLE_SERVICE_ACCOUNT_JSON: str = os.getenv(
     "GOOGLE_SERVICE_ACCOUNT_JSON", "credentials/service_account.json"
 )
 
+# New: Support for injecting JSON content directly via Environment Variable
+# (Crucial for Render/Cloud deployment)
+GOOGLE_SERVICE_ACCOUNT_CONTENT: str = os.getenv("GOOGLE_SERVICE_ACCOUNT_CONTENT", "")
+
+# If the file doesn't exist but we have the content, write it to the path
+if not Path(GOOGLE_SERVICE_ACCOUNT_JSON).exists() and GOOGLE_SERVICE_ACCOUNT_CONTENT:
+    try:
+        Path(GOOGLE_SERVICE_ACCOUNT_JSON).parent.mkdir(parents=True, exist_ok=True)
+        with open(GOOGLE_SERVICE_ACCOUNT_JSON, "w") as f:
+            f.write(GOOGLE_SERVICE_ACCOUNT_CONTENT)
+    except Exception as e:
+        print(f"Error creating service account file from env var: {e}")
+
 # The Drive folder whose contents will be indexed
 GOOGLE_DRIVE_FOLDER_ID: str = os.getenv("GOOGLE_DRIVE_FOLDER_ID", "")
 
@@ -42,9 +55,9 @@ GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 # ─── Embedding ────────────────────────────────────────────────────────────────
 
 EMBEDDING_MODEL: str = os.getenv(
-    "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"
+    "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"
 )
-EMBEDDING_DIMENSION: int = 384   # fixed output size for all-MiniLM-L6-v2
+EMBEDDING_DIMENSION: int = 384   # BAAI/bge-small-en-v1.5 also uses 384 dimensions
 
 # ─── FAISS / Storage ──────────────────────────────────────────────────────────
 
