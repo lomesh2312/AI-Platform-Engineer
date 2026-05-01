@@ -114,7 +114,7 @@ your-name@your-project.iam.gserviceaccount.com
 python main.py
 ```
 
-The API will be live at: **http://localhost:8000**
+The API is live at: **https://personal-rag-system.onrender.com**
 
 ### 7. Start the Streamlit UI
 
@@ -128,8 +128,8 @@ streamlit run app_ui.py
 The UI will be available at: **http://localhost:8501**
 
 
-- Swagger UI: http://localhost:8000/docs
-- Health check: http://localhost:8000/health
+- Swagger UI: https://personal-rag-system.onrender.com/docs
+- Health check: https://personal-rag-system.onrender.com/health
 
 ---
 
@@ -142,7 +142,7 @@ This downloads, processes, and indexes all documents from your Drive folder.
 > ℹ️ **Note:** Embeddings are generated via the **HuggingFace Inference API**. The first request may take a moment while the API wakes up. Make sure `HF_API_TOKEN` is set in your environment variables.
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/sync-drive
+curl -X POST https://personal-rag-system.onrender.com/api/v1/sync-drive
 ```
 
 **Example response:**
@@ -159,7 +159,7 @@ curl -X POST http://localhost:8000/api/v1/sync-drive
 ### Step 2 — Ask Questions
 
 ```bash
-curl -X POST http://localhost:8000/api/v1/ask \
+curl -X POST https://personal-rag-system.onrender.com/api/v1/ask \
   -H "Content-Type: application/json" \
   -d '{"query": "What is the refund policy?"}'
 ```
@@ -178,17 +178,17 @@ curl -X POST http://localhost:8000/api/v1/ask \
 
 ```bash
 # Policy questions
-curl -X POST http://localhost:8000/api/v1/ask \
+curl -X POST https://personal-rag-system.onrender.com/api/v1/ask \
   -d '{"query": "What are the leave policy rules?"}' \
   -H "Content-Type: application/json"
 
 # Compliance
-curl -X POST http://localhost:8000/api/v1/ask \
+curl -X POST https://personal-rag-system.onrender.com/api/v1/ask \
   -d '{"query": "What does the SOP say about data handling?"}' \
   -H "Content-Type: application/json"
 
 # Out-of-scope (should say I don't know)
-curl -X POST http://localhost:8000/api/v1/ask \
+curl -X POST https://personal-rag-system.onrender.com/api/v1/ask \
   -d '{"query": "What is the weather in Tokyo?"}' \
   -H "Content-Type: application/json"
 ```

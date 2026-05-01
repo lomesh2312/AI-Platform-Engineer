@@ -50,7 +50,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ─── Constants ────────────────────────────────────────────────────────────────
-API_BASE_URL = "http://localhost:8000/api/v1"
+API_BASE_URL = "https://personal-rag-system.onrender.com/api/v1"
 
 # ─── Sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
@@ -79,7 +79,7 @@ with st.sidebar:
     st.markdown("---")
     st.subheader("System Health")
     try:
-        health = requests.get("http://localhost:8000/health").json()
+        health = requests.get("https://personal-rag-system.onrender.com/health").json()
         st.markdown(f"Status: <span class='status-ok'>{health['status'].upper()}</span>", unsafe_allow_html=True)
     except:
         st.markdown("Status: <span style='color: #ff4b4b; font-weight: bold;'>OFFLINE</span>", unsafe_allow_html=True)
