@@ -54,10 +54,11 @@ GROQ_MODEL: str = os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile")
 
 # ─── Embedding ────────────────────────────────────────────────────────────────
 
-EMBEDDING_MODEL: str = os.getenv(
-    "EMBEDDING_MODEL", "BAAI/bge-small-en-v1.5"
-)
-EMBEDDING_DIMENSION: int = 384   # BAAI/bge-small-en-v1.5 also uses 384 dimensions
+EMBEDDING_MODEL: str = "sentence-transformers/all-MiniLM-L6-v2"
+EMBEDDING_DIMENSION: int = 384   # all-MiniLM-L6-v2 outputs 384 dimensions
+
+# HF Inference API Token (Free tier works)
+HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", "")
 
 # ─── FAISS / Storage ──────────────────────────────────────────────────────────
 

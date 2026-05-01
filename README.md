@@ -16,7 +16,7 @@ Google Drive Folder
  processing/chunker.py       ← Extract text (PDF/DOCX/TXT), clean, split into chunks
         │
         ▼
- embedding/embedder.py       ← Batch embed chunks via FastEmbed (BAAI/bge-small-en-v1.5)
+ embedding/embedder.py       ← Generate 384-dim embeddings via HuggingFace Inference API
         │
         ▼
  search/vector_store.py      ← Store in FAISS IndexFlatL2 (faiss_index.bin + metadata.json)
@@ -139,7 +139,7 @@ The UI will be available at: **http://localhost:8501**
 
 This downloads, processes, and indexes all documents from your Drive folder.
 
-> ℹ️ **Note:** The very first time you run this, it may take an extra 60-90 seconds to download the embedding model (~130MB).
+> ℹ️ **Note:** Embeddings are generated via the **HuggingFace Inference API**. The first request may take a moment while the API wakes up. Make sure `HF_API_TOKEN` is set in your environment variables.
 
 ```bash
 curl -X POST http://localhost:8000/api/v1/sync-drive
@@ -203,7 +203,7 @@ curl -X POST http://localhost:8000/api/v1/ask \
 | Google Drive | google-api-python-client (Service Account) |
 | PDF Extraction | PyMuPDF (fitz) |
 | DOCX Extraction | python-docx |
-| Embeddings | FastEmbed `BAAI/bge-small-en-v1.5` (384-dim, No PyTorch) |
+| Embeddings | HuggingFace Inference API (`all-MiniLM-L6-v2`) |
 | Vector Store | FAISS `IndexFlatL2` |
 | LLM | Groq `llama3-70b-8192` |
 | Config | python-dotenv |

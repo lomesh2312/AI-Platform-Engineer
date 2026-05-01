@@ -6,7 +6,6 @@ google-auth
 PyMuPDF
 python-docx
 faiss-cpu
-fastembed
 groq
 pydantic
 numpy
