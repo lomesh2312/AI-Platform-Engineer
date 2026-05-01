@@ -19,7 +19,8 @@ import config
 
 logger = logging.getLogger(__name__)
 
-HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/all-MiniLM-L6-v2"
+# Correct HF Inference API URL structure
+HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/all-MiniLM-L6-v2"
 
 def _call_hf_api(texts: List[str]) -> np.ndarray:
     """
@@ -37,16 +38,26 @@ def _call_hf_api(texts: List[str]) -> np.ndarray:
     
     logger.info("Calling HF Inference API for %d texts...", len(texts))
     
-    try:
-        response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
-        response.raise_for_status()
-        embeddings = response.json()
-        
-        # Ensure it's a float32 numpy array for FAISS
-        return np.array(embeddings).astype(np.float32)
-    except Exception as e:
-        logger.error(f"❌ HuggingFace API Error: {str(e)}")
-        raise
+    # Simple retry loop for 'loading' states or temporary issues
+    for attempt in range(3):
+        try:
+            response = requests.post(HF_API_URL, headers=headers, json=payload, timeout=60)
+            
+            # If the model is still loading, wait and retry
+            if response.status_code == 503:
+                logger.warning(f"HF Model is loading... attempt {attempt+1}/3. Waiting 10s.")
+                time.sleep(10)
+                continue
+                
+            response.raise_for_status()
+            embeddings = response.json()
+            return np.array(embeddings).astype(np.float32)
+            
+        except Exception as e:
+            if attempt == 2:
+                logger.error(f"❌ HuggingFace API Error: {str(e)}")
+                raise
+            time.sleep(2)
 
 def embed_chunks(chunks: List[dict]) -> np.ndarray:
     """
